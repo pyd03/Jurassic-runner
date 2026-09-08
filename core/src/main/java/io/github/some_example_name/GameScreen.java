@@ -41,7 +41,7 @@ public class GameScreen implements Screen {
     private OrthographicCamera camera;
     private Viewport viewport;
 
-    private final float sueloY = 140;
+    private final float sueloY = 225;
 
     // =========================
     // DINO
