@@ -539,9 +539,9 @@ public class GameScreen implements Screen {
             if (cactusLargo) {
 
                 rect.set(
-                    x + 8,
+                    x + 10,
                     sueloY + 5,
-                    58,
+                    100,
                     38
                 );
 
@@ -685,7 +685,7 @@ public class GameScreen implements Screen {
                     cactusLargo,
                     x,
                     sueloY,
-                    75,
+                    120,
                     48
                 );
 
