@@ -41,13 +41,6 @@ public class CharacterScreen implements Screen {
     private void cargarImagenes() {
 
         try {
-            background = new Texture("characters_background.png");
-        } catch (Exception e) {
-            System.out.println("No se pudo cargar characters_background.png");
-            background = null;
-        }
-
-        try {
             dino1 = new Texture("dino1.png");
         } catch (Exception e) {
             System.out.println("No se pudo cargar dino1.png");
@@ -359,8 +352,6 @@ public class CharacterScreen implements Screen {
         if (batch != null) batch.dispose();
 
         if (font != null) font.dispose();
-
-        if (background != null) background.dispose();
 
         if (dino1 != null) dino1.dispose();
 
