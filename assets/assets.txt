@@ -1,0 +1,10 @@
+bird.png
+cactus.png
+cactus_largo.png
+character_background.webp
+dino1.png
+dino2.png
+dino3.png
+game_background.png
+libgdx.png
+menu_background.png
