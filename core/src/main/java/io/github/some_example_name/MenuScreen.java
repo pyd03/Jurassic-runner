@@ -133,6 +133,7 @@ public class MenuScreen implements Screen {
             );
         }
 
+        // Titulo
         if (titulo != null) {
 
             float anchoTitulo = ancho * 0.55f;
@@ -144,42 +145,60 @@ public class MenuScreen implements Screen {
             batch.draw(
                 titulo,
                 (ancho - anchoTitulo) / 2,
-                alto * 0.72f,
+                alto * 0.60f,
                 anchoTitulo,
                 altoTitulo
             );
         }
 
+        // Jugar
         if (jugarImagen != null) {
+
+            float anchoImagen = jugar.width * 1.10f;
+            float altoImagen =
+                anchoImagen * jugarImagen.getHeight()
+                    / jugarImagen.getWidth();
 
             batch.draw(
                 jugarImagen,
-                jugar.x,
-                jugar.y,
-                jugar.width,
-                jugar.height
+                jugar.x + (jugar.width - anchoImagen) / 2,
+                jugar.y + (jugar.height - altoImagen) / 2,
+                anchoImagen,
+                altoImagen
             );
         }
 
+        // Pj
         if (personajesImagen != null) {
+
+            float anchoImagen = personajes.width * 1.10f;
+            float altoImagen =
+                anchoImagen * personajesImagen.getHeight()
+                    / personajesImagen.getWidth();
 
             batch.draw(
                 personajesImagen,
-                personajes.x,
-                personajes.y,
-                personajes.width,
-                personajes.height
+                personajes.x + (personajes.width - anchoImagen) / 2,
+                personajes.y + (personajes.height - altoImagen) / 2,
+                anchoImagen,
+                altoImagen
             );
         }
 
+        // Salir
         if (salirImagen != null) {
+
+            float anchoImagen = salir.width * 1.10f;
+            float altoImagen =
+                anchoImagen * salirImagen.getHeight()
+                    / salirImagen.getWidth();
 
             batch.draw(
                 salirImagen,
-                salir.x,
-                salir.y,
-                salir.width,
-                salir.height
+                salir.x + (salir.width - anchoImagen) / 2,
+                salir.y + (salir.height - altoImagen) / 2,
+                anchoImagen,
+                altoImagen
             );
         }
 
