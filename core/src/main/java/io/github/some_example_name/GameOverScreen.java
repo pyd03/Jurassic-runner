@@ -23,9 +23,9 @@ public class GameOverScreen implements Screen {
 
     private Texture background;
     private Texture gameOverImagen;
-    private Texture salirImagen;
 
-    private Rectangle salir;
+    private Rectangle reintentar;
+    private Rectangle menu;
 
     public GameOverScreen(
         Game game,
@@ -62,23 +62,19 @@ public class GameOverScreen implements Screen {
         }
 
         try {
+
             gameOverImagen =
                 new Texture("gameover.png");
+
         } catch (Exception e) {
+
             gameOverImagen = null;
         }
 
-        try {
-            salirImagen =
-                new Texture("boton_salir.png");
-        } catch (Exception e) {
-            salirImagen = null;
-        }
-
-        crearBoton();
+        crearBotones();
     }
 
-    private void crearBoton() {
+    private void crearBotones() {
 
         float ancho = Gdx.graphics.getWidth();
         float alto = Gdx.graphics.getHeight();
@@ -89,9 +85,19 @@ public class GameOverScreen implements Screen {
         float altoBoton =
             alto * 0.10f;
 
-        salir = new Rectangle(
-            (ancho - anchoBoton) / 2,
-            alto * 0.25f,
+        float xBoton =
+            (ancho - anchoBoton) / 2;
+
+        reintentar = new Rectangle(
+            xBoton,
+            alto * 0.30f,
+            anchoBoton,
+            altoBoton
+        );
+
+        menu = new Rectangle(
+            xBoton,
+            alto * 0.15f,
             anchoBoton,
             altoBoton
         );
@@ -119,7 +125,7 @@ public class GameOverScreen implements Screen {
         float alto =
             Gdx.graphics.getHeight();
 
-
+        // Fondo
         if (background != null) {
 
             batch.draw(
@@ -131,10 +137,11 @@ public class GameOverScreen implements Screen {
             );
         }
 
+        // Game Over
         if (gameOverImagen != null) {
 
             float anchoTitulo =
-                ancho * 0.45f;
+                ancho * 0.35f;
 
             float altoTitulo =
                 anchoTitulo *
@@ -169,6 +176,7 @@ public class GameOverScreen implements Screen {
             );
         }
 
+        // Puntos
         font.getData().setScale(1.5f);
 
         String textoPuntos =
@@ -186,16 +194,43 @@ public class GameOverScreen implements Screen {
             alto * 0.55f
         );
 
-        if (salirImagen != null) {
+        // Reintentar
+        font.getData().setScale(2);
 
-            batch.draw(
-                salirImagen,
-                salir.x,
-                salir.y,
-                salir.width,
-                salir.height
-            );
-        }
+        String textoReintentar =
+            "REINTENTAR";
+
+        layout.setText(
+            font,
+            textoReintentar
+        );
+
+        font.draw(
+            batch,
+            textoReintentar,
+            reintentar.x +
+                (reintentar.width - layout.width) / 2,
+            reintentar.y +
+                (reintentar.height + layout.height) / 2
+        );
+
+        // Menu Principal
+        String textoMenu =
+            "MENU PRINCIPAL";
+
+        layout.setText(
+            font,
+            textoMenu
+        );
+
+        font.draw(
+            batch,
+            textoMenu,
+            menu.x +
+                (menu.width - layout.width) / 2,
+            menu.y +
+                (menu.height + layout.height) / 2
+        );
 
         batch.end();
 
@@ -215,9 +250,20 @@ public class GameOverScreen implements Screen {
             Gdx.graphics.getHeight()
                 - Gdx.input.getY();
 
-        if (salir.contains(x, y)) {
+        if (reintentar.contains(x, y)) {
 
-            Gdx.app.exit();
+            game.setScreen(
+                new GameScreen(
+                    game,
+                    personaje
+                )
+            );
+
+        } else if (menu.contains(x, y)) {
+
+            game.setScreen(
+                new MenuScreen(game)
+            );
         }
     }
 
@@ -227,7 +273,7 @@ public class GameOverScreen implements Screen {
         int height
     ) {
 
-        crearBoton();
+        crearBotones();
     }
 
     @Override
@@ -256,8 +302,5 @@ public class GameOverScreen implements Screen {
 
         if (gameOverImagen != null)
             gameOverImagen.dispose();
-
-        if (salirImagen != null)
-            salirImagen.dispose();
     }
 }

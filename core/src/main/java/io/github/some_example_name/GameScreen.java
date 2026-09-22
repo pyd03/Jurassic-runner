@@ -31,10 +31,7 @@ public class GameScreen implements Screen {
     private Texture cactusLargo;
     private Texture bird;
 
-    // =========================
     // RESOLUCIÓN Y CÁMARA
-    // =========================
-
     private static final float ANCHO = 900;
     private static final float ALTO = 500;
 
@@ -43,19 +40,13 @@ public class GameScreen implements Screen {
 
     private final float sueloY = 225;
 
-    // =========================
     // DINO
-    // =========================
-
     private final int filaDino = 9;
     private final int columnaDino = 7;
 
     private float yDino;
 
-    // =========================
     // SALTO Y AGACHARSE
-    // =========================
-
     private boolean saltando = false;
     private boolean agachado = false;
 
@@ -64,9 +55,7 @@ public class GameScreen implements Screen {
     private final float fuerzaSalto = 420f;
     private final float gravedad = 1100f;
 
-    // =========================
     // OBSTÁCULOS
-    // =========================
 
     // 0 = ninguno
     // 1 = cactus
@@ -96,36 +85,24 @@ public class GameScreen implements Screen {
 
     private final Random random = new Random();
 
-    // =========================
     // HITBOXES
-    // =========================
-
     private final Rectangle rectDino = new Rectangle();
     private final Rectangle rectObstaculo1 = new Rectangle();
     private final Rectangle rectObstaculo2 = new Rectangle();
 
-    // =========================
     // INSTRUCCIONES
-    // =========================
-
     private final float DURACION_INSTRUCCIONES = 5f;
 
     private float tiempoInstrucciones = 0;
     private boolean mostrandoInstrucciones = true;
 
-    // =========================
     // CONSTRUCTOR
-    // =========================
-
     public GameScreen(Game game, int personaje) {
         this.game = game;
         this.personaje = personaje;
     }
 
-    // =========================
     // INICIALIZAR
-    // =========================
-
     @Override
     public void show() {
 
@@ -156,10 +133,7 @@ public class GameScreen implements Screen {
         cargarRecursos();
     }
 
-    // =========================
     // CARGAR RECURSOS
-    // =========================
-
     private void cargarRecursos() {
 
         try {
@@ -199,10 +173,7 @@ public class GameScreen implements Screen {
         }
     }
 
-    // =========================
     // RENDER
-    // =========================
-
     @Override
     public void render(float delta) {
 
@@ -225,10 +196,7 @@ public class GameScreen implements Screen {
         dibujar();
     }
 
-    // =========================
     // ACTUALIZAR
-    // =========================
-
     private void actualizar(float delta) {
 
         controlarSalto(delta);
@@ -239,10 +207,7 @@ public class GameScreen implements Screen {
         comprobarColisiones();
     }
 
-    // =========================
     // SALTO
-    // =========================
-
     private void controlarSalto(float delta) {
 
         if (
@@ -286,10 +251,7 @@ public class GameScreen implements Screen {
         }
     }
 
-    // =========================
     // AGACHARSE
-    // =========================
-
     private void controlarAgacharse() {
 
         agachado =
@@ -297,10 +259,7 @@ public class GameScreen implements Screen {
                 && !saltando;
     }
 
-    // =========================
     // MOVER OBSTÁCULOS
-    // =========================
-
     private void moverObstaculos(float delta) {
 
         float movimiento =
@@ -333,10 +292,7 @@ public class GameScreen implements Screen {
         }
     }
 
-    // =========================
     // SUMAR PUNTO Y VELOCIDAD
-    // =========================
-
     private void sumarPunto() {
 
         puntos++;
@@ -351,10 +307,8 @@ public class GameScreen implements Screen {
             distanciaMinima - 5
         );
     }
-    // =========================
-    // CREAR OBSTÁCULOS
-    // =========================
 
+    // CREAR OBSTÁCULOS
     private void crearObstaculos(float delta) {
 
         tiempoObstaculo += delta;
@@ -408,10 +362,7 @@ public class GameScreen implements Screen {
         }
     }
 
-    // =========================
     // MATRIZ
-    // =========================
-
     private void actualizarMatriz() {
 
         gameMap.limpiar();
@@ -462,10 +413,7 @@ public class GameScreen implements Screen {
         }
     }
 
-    // =========================
     // HITBOXES Y COLISIONES
-    // =========================
-
     private void comprobarColisiones() {
 
         // DINO
@@ -542,7 +490,7 @@ public class GameScreen implements Screen {
                     x + 10,
                     sueloY + 5,
                     100,
-                    38
+                    52
                 );
 
             } else {
@@ -566,10 +514,8 @@ public class GameScreen implements Screen {
             );
         }
     }
-    // =========================
-    // DIBUJAR JUEGO
-    // =========================
 
+    // DIBUJAR JUEGO
     private void dibujar() {
 
         Gdx.gl.glClearColor(
@@ -614,10 +560,7 @@ public class GameScreen implements Screen {
         batch.end();
     }
 
-    // =========================
     // DIBUJAR OBJETOS
-    // =========================
-
     private void dibujarObjetos() {
 
         float xDino = columnaDino * 15;
@@ -686,7 +629,7 @@ public class GameScreen implements Screen {
                     x,
                     sueloY,
                     120,
-                    48
+                    52
                 );
 
             } else if (cactus != null) {
@@ -716,10 +659,7 @@ public class GameScreen implements Screen {
         }
     }
 
-    // =========================
     // INSTRUCCIONES
-    // =========================
-
     private void dibujarInstrucciones() {
 
         Gdx.gl.glClearColor(
@@ -812,10 +752,7 @@ public class GameScreen implements Screen {
         );
     }
 
-    // =========================
     // GAME OVER
-    // =========================
-
     private void gameOver() {
 
         game.setScreen(
@@ -827,10 +764,7 @@ public class GameScreen implements Screen {
         );
     }
 
-    // =========================
     // RESIZE
-    // =========================
-
     @Override
     public void resize(
         int width,
@@ -856,10 +790,7 @@ public class GameScreen implements Screen {
     public void hide() {
     }
 
-    // =========================
     // DISPOSE
-    // =========================
-
     @Override
     public void dispose() {
 

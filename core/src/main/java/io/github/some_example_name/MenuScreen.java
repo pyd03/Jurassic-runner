@@ -79,21 +79,21 @@ public class MenuScreen implements Screen {
 
         jugar = new Rectangle(
             xBoton,
-            alto * 0.55f,
+            alto * 0.55f - 150,
             anchoBoton,
             altoBoton
         );
 
         personajes = new Rectangle(
             xBoton,
-            alto * 0.40f,
+            alto * 0.40f - 150,
             anchoBoton,
             altoBoton
         );
 
         salir = new Rectangle(
             xBoton,
-            alto * 0.25f,
+            alto * 0.25f - 200,
             anchoBoton,
             altoBoton
         );
@@ -136,7 +136,7 @@ public class MenuScreen implements Screen {
         // Titulo
         if (titulo != null) {
 
-            float anchoTitulo = ancho * 0.55f;
+            float anchoTitulo = ancho * 0.35f;
             float altoTitulo =
                 anchoTitulo *
                     titulo.getHeight() /
@@ -145,7 +145,7 @@ public class MenuScreen implements Screen {
             batch.draw(
                 titulo,
                 (ancho - anchoTitulo) / 2,
-                alto * 0.60f,
+                alto * 0.60f - 160,
                 anchoTitulo,
                 altoTitulo
             );
@@ -154,15 +154,21 @@ public class MenuScreen implements Screen {
         // Jugar
         if (jugarImagen != null) {
 
-            float anchoImagen = jugar.width * 1.10f;
-            float altoImagen =
-                anchoImagen * jugarImagen.getHeight()
-                    / jugarImagen.getWidth();
+            float anchoImagen = ancho * 0.33f;
+            float altoImagen = 300;
+
+            float xImagen =
+                (ancho - anchoImagen) / 2;
+
+            float yImagen =
+                alto * 0.55f
+                    + (jugar.height - altoImagen) / 2
+                    - 150;
 
             batch.draw(
                 jugarImagen,
-                jugar.x + (jugar.width - anchoImagen) / 2,
-                jugar.y + (jugar.height - altoImagen) / 2,
+                xImagen,
+                yImagen,
                 anchoImagen,
                 altoImagen
             );
@@ -171,15 +177,21 @@ public class MenuScreen implements Screen {
         // Pj
         if (personajesImagen != null) {
 
-            float anchoImagen = personajes.width * 1.10f;
-            float altoImagen =
-                anchoImagen * personajesImagen.getHeight()
-                    / personajesImagen.getWidth();
+            float anchoImagen = ancho * 0.33f;
+            float altoImagen = 300;
+
+            float xImagen =
+                (ancho - anchoImagen) / 2;
+
+            float yImagen =
+                alto * 0.40f
+                    + (personajes.height - altoImagen) / 2
+                    - 150;
 
             batch.draw(
                 personajesImagen,
-                personajes.x + (personajes.width - anchoImagen) / 2,
-                personajes.y + (personajes.height - altoImagen) / 2,
+                xImagen,
+                yImagen,
                 anchoImagen,
                 altoImagen
             );
@@ -188,15 +200,21 @@ public class MenuScreen implements Screen {
         // Salir
         if (salirImagen != null) {
 
-            float anchoImagen = salir.width * 1.10f;
-            float altoImagen =
-                anchoImagen * salirImagen.getHeight()
-                    / salirImagen.getWidth();
+            float anchoImagen = ancho * 0.33f;
+            float altoImagen = 300;
+
+            float xImagen =
+                (ancho - anchoImagen) / 2;
+
+            float yImagen =
+                alto * 0.25f
+                    + (salir.height - altoImagen) / 2
+                    - 200;
 
             batch.draw(
                 salirImagen,
-                salir.x + (salir.width - anchoImagen) / 2,
-                salir.y + (salir.height - altoImagen) / 2,
+                xImagen,
+                yImagen,
                 anchoImagen,
                 altoImagen
             );
