@@ -5,5 +5,9 @@ dino1.png
 dino2.png
 dino3.png
 game_background.png
+jugar.png
 libgdx.png
 menu_background.png
+pj.png
+salir.png
+titulo.png
