@@ -5,9 +5,9 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.Texture;
-import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.GlyphLayout;
+import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.Rectangle;
 
 public class GameOverScreen implements Screen {
@@ -22,14 +22,16 @@ public class GameOverScreen implements Screen {
     private GlyphLayout layout;
 
     private Texture background;
+    private Texture gameOverImagen;
+    private Texture salirImagen;
 
-    private Rectangle reintentar;
-    private Rectangle menu;
+    private Rectangle salir;
 
     public GameOverScreen(
         Game game,
         int personaje,
-        int puntos) {
+        int puntos
+    ) {
 
         this.game = game;
         this.personaje = personaje;
@@ -45,10 +47,6 @@ public class GameOverScreen implements Screen {
 
         layout = new GlyphLayout();
 
-        // =========================
-        // FONDO
-        // =========================
-
         try {
 
             background =
@@ -63,33 +61,36 @@ public class GameOverScreen implements Screen {
             background = null;
         }
 
-        crearBotones();
+        try {
+            gameOverImagen =
+                new Texture("gameover.png");
+        } catch (Exception e) {
+            gameOverImagen = null;
+        }
+
+        try {
+            salirImagen =
+                new Texture("boton_salir.png");
+        } catch (Exception e) {
+            salirImagen = null;
+        }
+
+        crearBoton();
     }
 
-    // =========================
-    // CREAR BOTONES
-    // =========================
-
-    private void crearBotones() {
+    private void crearBoton() {
 
         float ancho = Gdx.graphics.getWidth();
         float alto = Gdx.graphics.getHeight();
 
-        float anchoBoton = ancho * 0.30f;
-        float altoBoton = alto * 0.10f;
+        float anchoBoton =
+            ancho * 0.30f;
 
-        float xBoton =
-            (ancho - anchoBoton) / 2;
+        float altoBoton =
+            alto * 0.10f;
 
-        reintentar = new Rectangle(
-            xBoton,
-            alto * 0.42f,
-            anchoBoton,
-            altoBoton
-        );
-
-        menu = new Rectangle(
-            xBoton,
+        salir = new Rectangle(
+            (ancho - anchoBoton) / 2,
             alto * 0.25f,
             anchoBoton,
             altoBoton
@@ -118,9 +119,6 @@ public class GameOverScreen implements Screen {
         float alto =
             Gdx.graphics.getHeight();
 
-        // =========================
-        // FONDO
-        // =========================
 
         if (background != null) {
 
@@ -133,29 +131,43 @@ public class GameOverScreen implements Screen {
             );
         }
 
-        // =========================
-        // GAME OVER
-        // =========================
+        if (gameOverImagen != null) {
 
-        font.getData().setScale(3);
+            float anchoTitulo =
+                ancho * 0.45f;
 
-        String titulo = "GAME OVER";
+            float altoTitulo =
+                anchoTitulo *
+                    gameOverImagen.getHeight() /
+                    gameOverImagen.getWidth();
 
-        layout.setText(font, titulo);
+            batch.draw(
+                gameOverImagen,
+                (ancho - anchoTitulo) / 2,
+                alto * 0.72f,
+                anchoTitulo,
+                altoTitulo
+            );
 
-        float xTitulo =
-            (ancho - layout.width) / 2;
+        } else {
 
-        font.draw(
-            batch,
-            titulo,
-            xTitulo,
-            alto * 0.80f
-        );
+            font.getData().setScale(3);
 
-        // =========================
-        // PUNTOS
-        // =========================
+            String titulo =
+                "GAME OVER";
+
+            layout.setText(
+                font,
+                titulo
+            );
+
+            font.draw(
+                batch,
+                titulo,
+                (ancho - layout.width) / 2,
+                alto * 0.80f
+            );
+        }
 
         font.getData().setScale(1.5f);
 
@@ -167,70 +179,28 @@ public class GameOverScreen implements Screen {
             textoPuntos
         );
 
-        float xPuntos =
-            (ancho - layout.width) / 2;
-
         font.draw(
             batch,
             textoPuntos,
-            xPuntos,
-            alto * 0.65f
+            (ancho - layout.width) / 2,
+            alto * 0.55f
         );
 
-        // =========================
-        // REINTENTAR
-        // =========================
+        if (salirImagen != null) {
 
-        String textoReintentar =
-            "REINTENTAR";
-
-        layout.setText(
-            font,
-            textoReintentar
-        );
-
-        float xReintentar =
-            (ancho - layout.width) / 2;
-
-        font.draw(
-            batch,
-            textoReintentar,
-            xReintentar,
-            reintentar.y
-                + reintentar.height * 0.65f
-        );
-
-        // =========================
-        // MENU PRINCIPAL
-        // =========================
-
-        String textoMenu =
-            "MENU PRINCIPAL";
-
-        layout.setText(
-            font,
-            textoMenu
-        );
-
-        float xMenu =
-            (ancho - layout.width) / 2;
-
-        font.draw(
-            batch,
-            textoMenu,
-            xMenu,
-            menu.y
-                + menu.height * 0.65f
-        );
+            batch.draw(
+                salirImagen,
+                salir.x,
+                salir.y,
+                salir.width,
+                salir.height
+            );
+        }
 
         batch.end();
 
         comprobarClick();
     }
-
-    // =========================
-    // CLICK
-    // =========================
 
     private void comprobarClick() {
 
@@ -245,33 +215,19 @@ public class GameOverScreen implements Screen {
             Gdx.graphics.getHeight()
                 - Gdx.input.getY();
 
-        if (reintentar.contains(x, y)) {
+        if (salir.contains(x, y)) {
 
-            game.setScreen(
-                new GameScreen(
-                    game,
-                    personaje
-                )
-            );
-
-        } else if (menu.contains(x, y)) {
-
-            game.setScreen(
-                new MenuScreen(game)
-            );
+            Gdx.app.exit();
         }
     }
-
-    // =========================
-    // RESIZE
-    // =========================
 
     @Override
     public void resize(
         int width,
-        int height) {
+        int height
+    ) {
 
-        crearBotones();
+        crearBoton();
     }
 
     @Override
@@ -286,23 +242,22 @@ public class GameOverScreen implements Screen {
     public void hide() {
     }
 
-    // =========================
-    // DISPOSE
-    // =========================
-
     @Override
     public void dispose() {
 
-        if (batch != null) {
+        if (batch != null)
             batch.dispose();
-        }
 
-        if (font != null) {
+        if (font != null)
             font.dispose();
-        }
 
-        if (background != null) {
+        if (background != null)
             background.dispose();
-        }
+
+        if (gameOverImagen != null)
+            gameOverImagen.dispose();
+
+        if (salirImagen != null)
+            salirImagen.dispose();
     }
 }

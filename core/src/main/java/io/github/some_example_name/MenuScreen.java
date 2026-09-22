@@ -6,8 +6,6 @@ import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
-import com.badlogic.gdx.graphics.g2d.BitmapFont;
-import com.badlogic.gdx.graphics.g2d.GlyphLayout;
 import com.badlogic.gdx.math.Rectangle;
 
 public class MenuScreen implements Screen {
@@ -15,15 +13,16 @@ public class MenuScreen implements Screen {
     private final Game game;
 
     private SpriteBatch batch;
-    private BitmapFont font;
 
     private Texture background;
+    private Texture titulo;
+    private Texture jugarImagen;
+    private Texture personajesImagen;
+    private Texture salirImagen;
 
     private Rectangle jugar;
     private Rectangle personajes;
     private Rectangle salir;
-
-    private GlyphLayout layout;
 
     public MenuScreen(Game game) {
         this.game = game;
@@ -33,14 +32,35 @@ public class MenuScreen implements Screen {
     public void show() {
 
         batch = new SpriteBatch();
-        font = new BitmapFont();
-        layout = new GlyphLayout();
 
         try {
             background = new Texture("menu_background.png");
         } catch (Exception e) {
-            System.out.println("No se pudo cargar menu_background.png");
             background = null;
+        }
+
+        try {
+            titulo = new Texture("menu_titulo.png");
+        } catch (Exception e) {
+            titulo = null;
+        }
+
+        try {
+            jugarImagen = new Texture("boton_jugar.png");
+        } catch (Exception e) {
+            jugarImagen = null;
+        }
+
+        try {
+            personajesImagen = new Texture("boton_personajes.png");
+        } catch (Exception e) {
+            personajesImagen = null;
+        }
+
+        try {
+            salirImagen = new Texture("boton_salir.png");
+        } catch (Exception e) {
+            salirImagen = null;
         }
 
         crearBotones();
@@ -54,7 +74,8 @@ public class MenuScreen implements Screen {
         float anchoBoton = ancho * 0.30f;
         float altoBoton = alto * 0.10f;
 
-        float xBoton = (ancho - anchoBoton) / 2;
+        float xBoton =
+            (ancho - anchoBoton) / 2;
 
         jugar = new Rectangle(
             xBoton,
@@ -94,92 +115,73 @@ public class MenuScreen implements Screen {
 
         batch.begin();
 
-        float ancho = Gdx.graphics.getWidth();
+        float ancho =
+            Gdx.graphics.getWidth();
 
-        // =========================
-        // FONDO
-        // =========================
+        float alto =
+            Gdx.graphics.getHeight();
 
+        // Fondo
         if (background != null) {
 
             batch.draw(
                 background,
                 0,
                 0,
-                Gdx.graphics.getWidth(),
-                Gdx.graphics.getHeight()
+                ancho,
+                alto
             );
         }
 
-        // =========================
-        // TITULO
-        // =========================
+        if (titulo != null) {
 
-        font.getData().setScale(2);
+            float anchoTitulo = ancho * 0.55f;
+            float altoTitulo =
+                anchoTitulo *
+                    titulo.getHeight() /
+                    titulo.getWidth();
 
-        String titulo = "JURASSIC RUNNER";
+            batch.draw(
+                titulo,
+                (ancho - anchoTitulo) / 2,
+                alto * 0.72f,
+                anchoTitulo,
+                altoTitulo
+            );
+        }
 
-        layout.setText(font, titulo);
+        if (jugarImagen != null) {
 
-        float xTitulo =
-            (ancho - layout.width) / 2;
+            batch.draw(
+                jugarImagen,
+                jugar.x,
+                jugar.y,
+                jugar.width,
+                jugar.height
+            );
+        }
 
-        font.draw(
-            batch,
-            titulo,
-            xTitulo,
-            Gdx.graphics.getHeight() * 0.85f
-        );
+        if (personajesImagen != null) {
 
-        // =========================
-        // INICIAR
-        // =========================
+            batch.draw(
+                personajesImagen,
+                personajes.x,
+                personajes.y,
+                personajes.width,
+                personajes.height
+            );
+        }
 
-        font.getData().setScale(1.5f);
+        if (salirImagen != null) {
 
-        layout.setText(font, "INICIAR");
-
-        float xIniciar =
-            (ancho - layout.width) / 2;
-
-        font.draw(
-            batch,
-            "INICIAR",
-            xIniciar,
-            jugar.y + jugar.height * 0.65f
-        );
-
-        // =========================
-        // PERSONAJES
-        // =========================
-
-        layout.setText(font, "PERSONAJES");
-
-        float xPersonajes =
-            (ancho - layout.width) / 2;
-
-        font.draw(
-            batch,
-            "PERSONAJES",
-            xPersonajes,
-            personajes.y + personajes.height * 0.65f
-        );
-
-        // =========================
-        // SALIR
-        // =========================
-
-        layout.setText(font, "SALIR");
-
-        float xSalir =
-            (ancho - layout.width) / 2;
-
-        font.draw(
-            batch,
-            "SALIR",
-            xSalir,
-            salir.y + salir.height * 0.65f
-        );
+            batch.draw(
+                salirImagen,
+                salir.x,
+                salir.y,
+                salir.width,
+                salir.height
+            );
+        }
 
         batch.end();
 
@@ -200,7 +202,6 @@ public class MenuScreen implements Screen {
 
         if (jugar.contains(x, y)) {
 
-            // Personaje predeterminado
             game.setScreen(
                 new GameScreen(game, 1)
             );
@@ -218,8 +219,10 @@ public class MenuScreen implements Screen {
     }
 
     @Override
-    public void resize(int width, int height) {
-
+    public void resize(
+        int width,
+        int height
+    ) {
         crearBotones();
     }
 
@@ -238,16 +241,22 @@ public class MenuScreen implements Screen {
     @Override
     public void dispose() {
 
-        if (batch != null) {
+        if (batch != null)
             batch.dispose();
-        }
 
-        if (font != null) {
-            font.dispose();
-        }
-
-        if (background != null) {
+        if (background != null)
             background.dispose();
-        }
+
+        if (titulo != null)
+            titulo.dispose();
+
+        if (jugarImagen != null)
+            jugarImagen.dispose();
+
+        if (personajesImagen != null)
+            personajesImagen.dispose();
+
+        if (salirImagen != null)
+            salirImagen.dispose();
     }
 }
