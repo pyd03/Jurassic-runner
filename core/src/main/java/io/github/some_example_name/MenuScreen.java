@@ -40,25 +40,25 @@ public class MenuScreen implements Screen {
         }
 
         try {
-            titulo = new Texture("menu_titulo.png");
+            titulo = new Texture("titulo.png");
         } catch (Exception e) {
             titulo = null;
         }
 
         try {
-            jugarImagen = new Texture("boton_jugar.png");
+            jugarImagen = new Texture("jugar.png");
         } catch (Exception e) {
             jugarImagen = null;
         }
 
         try {
-            personajesImagen = new Texture("boton_personajes.png");
+            personajesImagen = new Texture("pj.png");
         } catch (Exception e) {
             personajesImagen = null;
         }
 
         try {
-            salirImagen = new Texture("boton_salir.png");
+            salirImagen = new Texture("salir.png");
         } catch (Exception e) {
             salirImagen = null;
         }
