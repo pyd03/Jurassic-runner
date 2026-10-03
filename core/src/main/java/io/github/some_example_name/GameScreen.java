@@ -26,6 +26,7 @@ public class GameScreen implements Screen {
     private GameMap gameMap;
 
     private Texture background;
+    private Texture backgroundAtardecer;
     private Texture dino;
     private Texture cactus;
     private Texture cactusLargo;
@@ -84,6 +85,12 @@ public class GameScreen implements Screen {
     private float tiempoObstaculo = 0;
 
     private final Random random = new Random();
+
+    // FONDO
+    private float tiempoFondo = 0;
+
+    private final float TIEMPO_CAMBIO_FONDO = 65f;
+    private final float DURACION_TRANSICION = 5f;
 
     // HITBOXES
     private final Rectangle rectDino = new Rectangle();
@@ -171,6 +178,14 @@ public class GameScreen implements Screen {
         } catch (Exception e) {
             background = null;
         }
+
+        try {
+            backgroundAtardecer = new Texture(
+                "game_background_atardecer.png"
+            );
+        } catch (Exception e) {
+            backgroundAtardecer = null;
+        }
     }
 
     // RENDER
@@ -198,6 +213,8 @@ public class GameScreen implements Screen {
 
     // ACTUALIZAR
     private void actualizar(float delta) {
+
+        tiempoFondo += delta;
 
         controlarSalto(delta);
         controlarAgacharse();
@@ -355,6 +372,7 @@ public class GameScreen implements Screen {
             if (tipoObstaculo2 == 1) {
                 cactusLargo2 = random.nextBoolean();
             }
+
         } else {
 
             obstaculo2Activo = false;
@@ -535,16 +553,7 @@ public class GameScreen implements Screen {
 
         batch.begin();
 
-        if (background != null) {
-
-            batch.draw(
-                background,
-                0,
-                0,
-                ANCHO,
-                ALTO
-            );
-        }
+        dibujarFondo();
 
         dibujarObjetos();
 
@@ -558,6 +567,65 @@ public class GameScreen implements Screen {
         );
 
         batch.end();
+    }
+
+    private void dibujarFondo() {
+
+        // FONDO DE DÍA
+        if (background != null) {
+
+            batch.setColor(
+                1,
+                1,
+                1,
+                1
+            );
+
+            batch.draw(
+                background,
+                0,
+                0,
+                ANCHO,
+                ALTO
+            );
+        }
+
+        // TRANSICIÓN AL ATARDECER
+        if (
+            tiempoFondo >= TIEMPO_CAMBIO_FONDO
+                && backgroundAtardecer != null
+        ) {
+
+            float progreso =
+                (tiempoFondo - TIEMPO_CAMBIO_FONDO)
+                    / DURACION_TRANSICION;
+
+            if (progreso > 1) {
+                progreso = 1;
+            }
+
+            batch.setColor(
+                1,
+                1,
+                1,
+                progreso
+            );
+
+            batch.draw(
+                backgroundAtardecer,
+                0,
+                0,
+                ANCHO,
+                ALTO
+            );
+
+            batch.setColor(
+                1,
+                1,
+                1,
+                1
+            );
+        }
     }
 
     // DIBUJAR OBJETOS
@@ -616,6 +684,7 @@ public class GameScreen implements Screen {
         if (!activo) {
             return;
         }
+
         // CACTUS
         if (tipo == 1) {
 
@@ -643,6 +712,7 @@ public class GameScreen implements Screen {
                 );
             }
         }
+
         // PÁJARO
         else if (
             tipo == 2
@@ -814,5 +884,8 @@ public class GameScreen implements Screen {
 
         if (background != null)
             background.dispose();
+
+        if (backgroundAtardecer != null)
+            backgroundAtardecer.dispose();
     }
 }

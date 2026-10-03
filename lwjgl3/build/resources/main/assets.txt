@@ -4,7 +4,8 @@ cactus_largo.png
 dino1.png
 dino2.png
 dino3.png
-game_background.png
+game_background_atardecer.png
+game_background_dia.png
 jugar.png
 libgdx.png
 menu_background.png
