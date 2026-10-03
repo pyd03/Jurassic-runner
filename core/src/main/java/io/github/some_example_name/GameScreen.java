@@ -35,6 +35,30 @@ public class GameScreen implements Screen {
     private float anchoCactusLargo = 80;
     private float altoCactusLargo = 30;
 
+    private Texture texOllita;
+    private Texture texHoyueloTranquilo;
+    private Texture texHoyueloEnojado;
+
+    private static final float TAM_POWERUP = 50;
+    private static final float ALTURA_POWERUP = 80;
+    private static final float TAM_HOYUELO = 52;
+    private static final float TAM_OLLITA = 46;
+
+    private int hoyuelo = 0;
+    private int ollita = 0;
+    private boolean hoyueloAbsorbiendo = false;
+    private float tiempoHoyuelo = 0;
+    private float tiempoOllita = 0;
+
+    private boolean powerUpActivo = false;
+    private int tipoPowerUp = 0;
+    private float xPowerUp = -100;
+    private float tiempoPowerUp = 0;
+    private float intervaloPowerUp = 10f;
+    private float tiempoAnimacion = 0;
+    private boolean terminado = false;
+    private final Rectangle rectPowerUp = new Rectangle();
+
     // RESOLUCIÓN Y CÁMARA
     private static final float ANCHO = 900;
     private static final float ALTO = 500;
@@ -173,6 +197,24 @@ public class GameScreen implements Screen {
         }
 
         try {
+            texOllita = new Texture("Ollita.png");
+        } catch (Exception e) {
+            texOllita = null;
+        }
+
+        try {
+            texHoyueloTranquilo = new Texture("Hoyuelo_tranquilo.png");
+        } catch (Exception e) {
+            texHoyueloTranquilo = null;
+        }
+
+        try {
+            texHoyueloEnojado = new Texture("Hoyuelo_enojado.png");
+        } catch (Exception e) {
+            texHoyueloEnojado = null;
+        }
+
+        try {
             background = new Texture("game_background.png");
         } catch (Exception e) {
             background = null;
@@ -211,8 +253,10 @@ public class GameScreen implements Screen {
         controlarAgacharse();
         moverObstaculos(delta);
         crearObstaculos(delta);
+        actualizarPowerUps(delta);
         actualizarMatriz();
         comprobarColisiones();
+        comprobarPowerUps();
     }
 
     // SALTO
@@ -437,7 +481,7 @@ public class GameScreen implements Screen {
             );
 
             if (rectDino.overlaps(rectObstaculo1)) {
-                gameOver();
+                colision();
             }
         }
 
@@ -451,7 +495,7 @@ public class GameScreen implements Screen {
             );
 
             if (rectDino.overlaps(rectObstaculo2)) {
-                gameOver();
+                colision();
             }
         }
     }
@@ -563,6 +607,8 @@ public class GameScreen implements Screen {
             obstaculo2Activo,
             cactusLargo2
         );
+
+        dibujarPowerUps(xDino);
     }
 
     private void dibujarObstaculo(
@@ -638,6 +684,151 @@ public class GameScreen implements Screen {
         );
     }
 
+    private float yPowerUp() {
+        return sueloY + ALTURA_POWERUP
+            + (float) Math.sin(tiempoAnimacion * 4) * 4;
+    }
+
+    private void actualizarPowerUps(float delta) {
+        tiempoAnimacion += delta;
+
+        if (!powerUpActivo && hoyuelo == 0 && ollita == 0) {
+            tiempoPowerUp += delta;
+
+            if (tiempoPowerUp >= intervaloPowerUp) {
+                crearPowerUp();
+            }
+        }
+
+        if (powerUpActivo) {
+            xPowerUp -= velocidad * delta;
+
+            if (xPowerUp < -100) {
+                powerUpActivo = false;
+            }
+        }
+
+        if (hoyueloAbsorbiendo) {
+            tiempoHoyuelo += delta;
+
+            if (tiempoHoyuelo >= 1f) {
+                hoyuelo = 0;
+                hoyueloAbsorbiendo = false;
+            }
+        }
+
+        if (ollita == 1) {
+            tiempoOllita -= delta;
+
+            if (tiempoOllita <= 0) {
+                ollita = 0;
+            }
+        }
+    }
+
+    private void crearPowerUp() {
+        powerUpActivo = true;
+        xPowerUp = 920;
+        tipoPowerUp = random.nextBoolean() ? 1 : 2;
+        tiempoPowerUp = 0;
+        intervaloPowerUp = 12 + random.nextFloat() * 8;
+    }
+
+    private void comprobarPowerUps() {
+        if (!powerUpActivo) {
+            return;
+        }
+
+        rectPowerUp.set(
+            xPowerUp + 8,
+            yPowerUp() + 8,
+            TAM_POWERUP - 16,
+            TAM_POWERUP - 16
+        );
+
+        if (rectDino.overlaps(rectPowerUp)) {
+            powerUpActivo = false;
+            tiempoPowerUp = 0;
+
+            if (tipoPowerUp == 1) {
+                hoyuelo = 1;
+                hoyueloAbsorbiendo = false;
+                tiempoHoyuelo = 0;
+            } else {
+                ollita = 1;
+                tiempoOllita = 5f + random.nextFloat() * 5f;
+            }
+        }
+    }
+
+    private void colision() {
+        if (terminado || ollita == 1) {
+            return;
+        }
+
+        if (hoyuelo == 1) {
+            if (!hoyueloAbsorbiendo) {
+                hoyueloAbsorbiendo = true;
+                tiempoHoyuelo = 0;
+            }
+            return;
+        }
+
+        terminado = true;
+        gameOver();
+    }
+
+    private void dibujarPowerUps(float xDino) {
+        if (powerUpActivo) {
+            Texture tex = tipoPowerUp == 1 ? texHoyueloTranquilo : texOllita;
+
+            if (tex != null) {
+                batch.draw(
+                    tex,
+                    xPowerUp,
+                    yPowerUp(),
+                    TAM_POWERUP,
+                    TAM_POWERUP
+                );
+            }
+        }
+
+        float anchoDino = agachado ? 50 : 40;
+        float altoDino = agachado ? 30 : 55;
+
+        if (hoyuelo == 1 && texHoyueloEnojado != null) {
+            boolean visible = !hoyueloAbsorbiendo
+                || ((int) (tiempoHoyuelo * 10)) % 2 == 0;
+
+            if (visible) {
+                batch.draw(
+                    texHoyueloEnojado,
+                    xDino + anchoDino - 22,
+                    yDino - 2,
+                    TAM_HOYUELO,
+                    TAM_HOYUELO
+                );
+            }
+        }
+
+        if (ollita == 1 && texOllita != null) {
+            boolean visible = tiempoOllita > 1.5f
+                || ((int) (tiempoOllita * 8)) % 2 == 0;
+
+            if (visible) {
+                float flotar = (float) Math.sin(tiempoAnimacion * 6) * 3;
+
+                batch.draw(
+                    texOllita,
+                    xDino + anchoDino / 2 - TAM_OLLITA / 2,
+                    yDino + altoDino - 4 + flotar,
+                    TAM_OLLITA,
+                    TAM_OLLITA
+                );
+            }
+        }
+    }
+
     // GAME OVER
     private void gameOver() {
         game.setScreen(
@@ -676,6 +867,9 @@ public class GameScreen implements Screen {
         if (cactus != null) cactus.dispose();
         if (cactusLargo != null) cactusLargo.dispose();
         if (bird != null) bird.dispose();
+        if (texOllita != null) texOllita.dispose();
+        if (texHoyueloTranquilo != null) texHoyueloTranquilo.dispose();
+        if (texHoyueloEnojado != null) texHoyueloEnojado.dispose();
         if (background != null) background.dispose();
         if (backgroundAtardecer != null) backgroundAtardecer.dispose();
     }

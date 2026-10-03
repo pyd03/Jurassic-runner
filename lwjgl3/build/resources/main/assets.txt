@@ -1,5 +1,5 @@
-Hoyuelo enojado.png
-Hoyuelo tranquilo.png
+Hoyuelo_enojado.png
+Hoyuelo_tranquilo.png
 Ollita.png
 bird.png
 cactus.png
