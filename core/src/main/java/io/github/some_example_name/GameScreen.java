@@ -32,6 +32,9 @@ public class GameScreen implements Screen {
     private Texture cactusLargo;
     private Texture bird;
 
+    private float anchoCactusLargo = 80;
+    private float altoCactusLargo = 30;
+
     // RESOLUCIÓN Y CÁMARA
     private static final float ANCHO = 900;
     private static final float ALTO = 500;
@@ -39,29 +42,40 @@ public class GameScreen implements Screen {
     private OrthographicCamera camera;
     private Viewport viewport;
 
-    private final float sueloY = 225;
+    private final float sueloY = 200;
 
     // DINO
     private final int filaDino = 9;
     private final int columnaDino = 7;
-
     private float yDino;
 
     // SALTO Y AGACHARSE
+    private static final float PASO_FISICA = 1f / 60f;
+    private static final float K = 55f / 47f;
+
+    private static final float GRAVEDAD_SALTO = 0.6f * K;
+    private static final float VEL_SALTO_BASE = 10f * K;
+    private static final float VEL_CORTE = 5f * K;
+    private static final float ALTURA_MINIMA = 30f * K;
+    private static final float ALTURA_MAXIMA = 63f * K;
+    private static final float COEF_CAIDA_RAPIDA = 3f;
+    private static final float VEL_INICIO_CAIDA = 1f * K;
+    private static final float VELOCIDAD_INICIAL = 180f;
+    private static final float VEL_CHROME_MIN = 6f;
+    private static final float VEL_CHROME_MAX = 13f;
+
     private boolean saltando = false;
     private boolean agachado = false;
-
     private float velocidadSalto = 0;
-
-    private final float fuerzaSalto = 420f;
-    private final float gravedad = 1100f;
+    private boolean alturaMinimaAlcanzada = false;
+    private boolean caidaRapida = false;
+    private boolean espacioPrevio = false;
+    private float acumuladorFisica = 0;
 
     // OBSTÁCULOS
-
     // 0 = ninguno
     // 1 = cactus
     // 2 = pájaro
-
     private int tipoObstaculo1 = 0;
     private int tipoObstaculo2 = 0;
 
@@ -78,17 +92,15 @@ public class GameScreen implements Screen {
 
     private int puntos = 0;
 
-    private float velocidad = 180;
+    private float velocidad = VELOCIDAD_INICIAL;
     private final float velocidadMaxima = 400;
     private final float aumentoVelocidad = 10;
 
     private float tiempoObstaculo = 0;
-
     private final Random random = new Random();
 
     // FONDO
     private float tiempoFondo = 0;
-
     private final float TIEMPO_CAMBIO_FONDO = 65f;
     private final float DURACION_TRANSICION = 5f;
 
@@ -99,7 +111,6 @@ public class GameScreen implements Screen {
 
     // INSTRUCCIONES
     private final float DURACION_INSTRUCCIONES = 5f;
-
     private float tiempoInstrucciones = 0;
     private boolean mostrandoInstrucciones = true;
 
@@ -112,27 +123,15 @@ public class GameScreen implements Screen {
     // INICIALIZAR
     @Override
     public void show() {
-
         batch = new SpriteBatch();
         font = new BitmapFont();
         gameMap = new GameMap();
 
         camera = new OrthographicCamera();
-
-        viewport = new FitViewport(
-            ANCHO,
-            ALTO,
-            camera
-        );
-
+        viewport = new FitViewport(ANCHO, ALTO, camera);
         viewport.apply();
 
-        camera.position.set(
-            ANCHO / 2,
-            ALTO / 2,
-            0
-        );
-
+        camera.position.set(ANCHO / 2, ALTO / 2, 0);
         camera.update();
 
         yDino = sueloY;
@@ -142,7 +141,6 @@ public class GameScreen implements Screen {
 
     // CARGAR RECURSOS
     private void cargarRecursos() {
-
         try {
             dino = new Texture(
                 personaje == 1 ? "dino1.png"
@@ -161,6 +159,9 @@ public class GameScreen implements Screen {
 
         try {
             cactusLargo = new Texture("cactus_largo.png");
+            altoCactusLargo = anchoCactusLargo
+                * cactusLargo.getHeight()
+                / cactusLargo.getWidth();
         } catch (Exception e) {
             cactusLargo = null;
         }
@@ -172,17 +173,13 @@ public class GameScreen implements Screen {
         }
 
         try {
-            background = new Texture(
-                "game_background.png"
-            );
+            background = new Texture("game_background.png");
         } catch (Exception e) {
             background = null;
         }
 
         try {
-            backgroundAtardecer = new Texture(
-                "game_background_atardecer.png"
-            );
+            backgroundAtardecer = new Texture("game_background_atardecer.png");
         } catch (Exception e) {
             backgroundAtardecer = null;
         }
@@ -191,19 +188,14 @@ public class GameScreen implements Screen {
     // RENDER
     @Override
     public void render(float delta) {
-
         if (mostrandoInstrucciones) {
-
             tiempoInstrucciones += delta;
-
             dibujarInstrucciones();
 
             if (tiempoInstrucciones >= DURACION_INSTRUCCIONES) {
-
                 mostrandoInstrucciones = false;
                 tiempoObstaculo = 0;
             }
-
             return;
         }
 
@@ -213,7 +205,6 @@ public class GameScreen implements Screen {
 
     // ACTUALIZAR
     private void actualizar(float delta) {
-
         tiempoFondo += delta;
 
         controlarSalto(delta);
@@ -226,84 +217,113 @@ public class GameScreen implements Screen {
 
     // SALTO
     private void controlarSalto(float delta) {
+        boolean espacio = Gdx.input.isKeyPressed(Input.Keys.SPACE);
 
         if (
             Gdx.input.isKeyJustPressed(Input.Keys.SPACE)
                 && !saltando
                 && !agachado
         ) {
-            saltando = true;
-            velocidadSalto = fuerzaSalto;
+            iniciarSalto();
         }
 
-        if (saltando) {
-
-            float gravedadActual;
-
-            if (
-                Gdx.input.isKeyPressed(Input.Keys.SPACE)
-                    && velocidadSalto < 250
-            ) {
-                gravedadActual = gravedad * 0.55f;
-            } else {
-                gravedadActual = gravedad;
-            }
-
-            velocidadSalto -=
-                gravedadActual * delta;
-
-            yDino +=
-                velocidadSalto * delta;
-
-            if (yDino >= sueloY + 120) {
-                yDino = sueloY + 120;
-                velocidadSalto = 0;
-            }
-
-            if (yDino <= sueloY) {
-                yDino = sueloY;
-                velocidadSalto = 0;
-                saltando = false;
-            }
+        if (saltando && espacioPrevio && !espacio) {
+            terminarSalto();
         }
+        espacioPrevio = espacio;
+
+        if (!saltando) {
+            acumuladorFisica = 0;
+            return;
+        }
+
+        boolean abajo = Gdx.input.isKeyPressed(Input.Keys.S);
+        if (abajo && !caidaRapida) {
+            caidaRapida = true;
+            velocidadSalto = -VEL_INICIO_CAIDA;
+        } else if (!abajo && caidaRapida) {
+            caidaRapida = false;
+        }
+
+        acumuladorFisica += Math.min(delta, 0.1f);
+        while (saltando && acumuladorFisica >= PASO_FISICA) {
+            pasoSalto();
+            acumuladorFisica -= PASO_FISICA;
+        }
+    }
+
+    private void iniciarSalto() {
+        float t = (velocidad - VELOCIDAD_INICIAL)
+            / (velocidadMaxima - VELOCIDAD_INICIAL);
+        float velChrome = VEL_CHROME_MIN + t * (VEL_CHROME_MAX - VEL_CHROME_MIN);
+
+        saltando = true;
+        velocidadSalto = VEL_SALTO_BASE + (velChrome / 10f) * K;
+        alturaMinimaAlcanzada = false;
+        caidaRapida = false;
+        acumuladorFisica = 0;
+    }
+
+    private void terminarSalto() {
+        if (alturaMinimaAlcanzada && velocidadSalto > VEL_CORTE) {
+            velocidadSalto = VEL_CORTE;
+        }
+    }
+
+    private void pasoSalto() {
+        float altura = yDino - sueloY;
+
+        if (caidaRapida) {
+            altura += velocidadSalto * COEF_CAIDA_RAPIDA;
+        } else {
+            altura += velocidadSalto;
+        }
+
+        velocidadSalto -= GRAVEDAD_SALTO;
+
+        if (altura > ALTURA_MINIMA || caidaRapida) {
+            alturaMinimaAlcanzada = true;
+        }
+
+        if (altura > ALTURA_MAXIMA || caidaRapida) {
+            terminarSalto();
+        }
+
+        if (altura <= 0) {
+            altura = 0;
+            velocidadSalto = 0;
+            saltando = false;
+            caidaRapida = false;
+        }
+
+        yDino = sueloY + altura;
     }
 
     // AGACHARSE
     private void controlarAgacharse() {
-
-        agachado =
-            Gdx.input.isKeyPressed(Input.Keys.S)
-                && !saltando;
+        agachado = Gdx.input.isKeyPressed(Input.Keys.S) && !saltando;
     }
 
     // MOVER OBSTÁCULOS
     private void moverObstaculos(float delta) {
-
-        float movimiento =
-            velocidad * delta;
+        float movimiento = velocidad * delta;
 
         // Obstáculo 1
         if (obstaculo1Activo) {
-
             xObstaculo1 -= movimiento;
 
             if (xObstaculo1 < -100) {
-
                 obstaculo1Activo = false;
-
                 sumarPunto();
             }
         }
 
         // Obstáculo 2
         if (obstaculo2Activo) {
-
             xObstaculo2 -= movimiento;
 
             if (xObstaculo2 < -100) {
-
                 obstaculo2Activo = false;
-
                 sumarPunto();
             }
         }
@@ -311,7 +331,6 @@ public class GameScreen implements Screen {
 
     // SUMAR PUNTO Y VELOCIDAD
     private void sumarPunto() {
-
         puntos++;
 
         velocidad = Math.min(
@@ -327,7 +346,6 @@ public class GameScreen implements Screen {
 
     // CREAR OBSTÁCULOS
     private void crearObstaculos(float delta) {
-
         tiempoObstaculo += delta;
 
         // Espera entre grupos
@@ -336,10 +354,7 @@ public class GameScreen implements Screen {
         }
 
         // Espera hasta que no haya obstáculos
-        if (
-            obstaculo1Activo
-                || obstaculo2Activo
-        ) {
+        if (obstaculo1Activo || obstaculo2Activo) {
             return;
         }
 
@@ -347,11 +362,8 @@ public class GameScreen implements Screen {
 
         // Primer obstáculo
         obstaculo1Activo = true;
-
         xObstaculo1 = 920;
-
-        tipoObstaculo1 =
-            random.nextInt(2) + 1;
+        tipoObstaculo1 = random.nextInt(2) + 1;
 
         if (tipoObstaculo1 == 1) {
             cactusLargo1 = random.nextBoolean();
@@ -359,22 +371,14 @@ public class GameScreen implements Screen {
 
         // 70% de posibilidades de crear un segundo
         if (random.nextFloat() < 0.70f) {
-
             obstaculo2Activo = true;
-
-            xObstaculo2 =
-                xObstaculo1 + distanciaMinima
-                    + random.nextInt(100);
-
-            tipoObstaculo2 =
-                random.nextInt(2) + 1;
+            xObstaculo2 = xObstaculo1 + distanciaMinima + random.nextInt(100);
+            tipoObstaculo2 = random.nextInt(2) + 1;
 
             if (tipoObstaculo2 == 1) {
                 cactusLargo2 = random.nextBoolean();
             }
-
         } else {
-
             obstaculo2Activo = false;
             tipoObstaculo2 = 0;
         }
@@ -382,70 +386,39 @@ public class GameScreen implements Screen {
 
     // MATRIZ
     private void actualizarMatriz() {
-
         gameMap.limpiar();
-
-        gameMap.colocarDinosaurio(
-            filaDino,
-            columnaDino
-        );
+        gameMap.colocarDinosaurio(filaDino, columnaDino);
 
         if (obstaculo1Activo) {
-
-            colocarEnMatriz(
-                tipoObstaculo1,
-                xObstaculo1
-            );
+            colocarEnMatriz(tipoObstaculo1, xObstaculo1);
         }
 
         if (obstaculo2Activo) {
-
-            colocarEnMatriz(
-                tipoObstaculo2,
-                xObstaculo2
-            );
+            colocarEnMatriz(tipoObstaculo2, xObstaculo2);
         }
     }
 
-    private void colocarEnMatriz(
-        int tipo,
-        float x
-    ) {
-
-        int columna =
-            (int) (x / 15);
+    private void colocarEnMatriz(int tipo, float x) {
+        int columna = (int) (x / 15);
 
         if (tipo == 1) {
-
-            gameMap.colocarCactus(
-                9,
-                columna
-            );
-
+            gameMap.colocarCactus(9, columna);
         } else if (tipo == 2) {
-
-            gameMap.colocarPajaro(
-                6,
-                columna
-            );
+            gameMap.colocarPajaro(6, columna);
         }
     }
 
     // HITBOXES Y COLISIONES
     private void comprobarColisiones() {
-
         // DINO
         if (agachado) {
-
             rectDino.set(
                 columnaDino * 15 + 8,
                 yDino + 3,
                 28,
                 30
             );
-
         } else {
-
             rectDino.set(
                 columnaDino * 15 + 8,
                 yDino + 4,
@@ -456,7 +429,6 @@ public class GameScreen implements Screen {
 
         // OBSTÁCULO 1
         if (obstaculo1Activo) {
-
             crearHitbox(
                 rectObstaculo1,
                 tipoObstaculo1,
@@ -464,18 +436,13 @@ public class GameScreen implements Screen {
                 cactusLargo1
             );
 
-            if (
-                rectDino.overlaps(
-                    rectObstaculo1
-                )
-            ) {
+            if (rectDino.overlaps(rectObstaculo1)) {
                 gameOver();
             }
         }
 
         // OBSTÁCULO 2
         if (obstaculo2Activo) {
-
             crearHitbox(
                 rectObstaculo2,
                 tipoObstaculo2,
@@ -483,11 +450,7 @@ public class GameScreen implements Screen {
                 cactusLargo2
             );
 
-            if (
-                rectDino.overlaps(
-                    rectObstaculo2
-                )
-            ) {
+            if (rectDino.overlaps(rectObstaculo2)) {
                 gameOver();
             }
         }
@@ -499,20 +462,15 @@ public class GameScreen implements Screen {
         float x,
         boolean cactusLargo
     ) {
-
         if (tipo == 1) {
-
             if (cactusLargo) {
-
                 rect.set(
-                    x + 10,
-                    sueloY + 5,
-                    100,
-                    52
+                    x + anchoCactusLargo * 0.15f,
+                    sueloY + altoCactusLargo * 0.05f,
+                    anchoCactusLargo * 0.70f,
+                    altoCactusLargo * 0.75f
                 );
-
             } else {
-
                 rect.set(
                     x + 12,
                     sueloY + 5,
@@ -520,9 +478,7 @@ public class GameScreen implements Screen {
                     25
                 );
             }
-
         } else {
-
             // HITBOX DEL PÁJARO
             rect.set(
                 x + 5,
@@ -535,30 +491,16 @@ public class GameScreen implements Screen {
 
     // DIBUJAR JUEGO
     private void dibujar() {
+        Gdx.gl.glClearColor(0.1f, 0.1f, 0.1f, 1);
+        Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 
-        Gdx.gl.glClearColor(
-            0.1f,
-            0.1f,
-            0.1f,
-            1
-        );
-
-        Gdx.gl.glClear(
-            GL20.GL_COLOR_BUFFER_BIT
-        );
-
-        batch.setProjectionMatrix(
-            camera.combined
-        );
-
+        batch.setProjectionMatrix(camera.combined);
         batch.begin();
 
         dibujarFondo();
-
         dibujarObjetos();
 
         font.getData().setScale(1.5f);
-
         font.draw(
             batch,
             "PUNTOS: " + puntos,
@@ -570,24 +512,10 @@ public class GameScreen implements Screen {
     }
 
     private void dibujarFondo() {
-
         // FONDO DE DÍA
         if (background != null) {
-
-            batch.setColor(
-                1,
-                1,
-                1,
-                1
-            );
-
-            batch.draw(
-                background,
-                0,
-                0,
-                ANCHO,
-                ALTO
-            );
+            batch.setColor(1, 1, 1, 1);
+            batch.draw(background, 0, 0, ANCHO, ALTO);
         }
 
         // TRANSICIÓN AL ATARDECER
@@ -595,65 +523,28 @@ public class GameScreen implements Screen {
             tiempoFondo >= TIEMPO_CAMBIO_FONDO
                 && backgroundAtardecer != null
         ) {
-
             float progreso =
-                (tiempoFondo - TIEMPO_CAMBIO_FONDO)
-                    / DURACION_TRANSICION;
+                (tiempoFondo - TIEMPO_CAMBIO_FONDO) / DURACION_TRANSICION;
 
             if (progreso > 1) {
                 progreso = 1;
             }
 
-            batch.setColor(
-                1,
-                1,
-                1,
-                progreso
-            );
-
-            batch.draw(
-                backgroundAtardecer,
-                0,
-                0,
-                ANCHO,
-                ALTO
-            );
-
-            batch.setColor(
-                1,
-                1,
-                1,
-                1
-            );
+            batch.setColor(1, 1, 1, progreso);
+            batch.draw(backgroundAtardecer, 0, 0, ANCHO, ALTO);
+            batch.setColor(1, 1, 1, 1);
         }
     }
 
     // DIBUJAR OBJETOS
     private void dibujarObjetos() {
-
         float xDino = columnaDino * 15;
 
         if (dino != null) {
-
             if (agachado) {
-
-                batch.draw(
-                    dino,
-                    xDino,
-                    yDino,
-                    50,
-                    30
-                );
-
+                batch.draw(dino, xDino, yDino, 50, 30);
             } else {
-
-                batch.draw(
-                    dino,
-                    xDino,
-                    yDino,
-                    40,
-                    55
-                );
+                batch.draw(dino, xDino, yDino, 40, 55);
             }
         }
 
@@ -680,115 +571,45 @@ public class GameScreen implements Screen {
         boolean activo,
         boolean esCactusLargo
     ) {
-
         if (!activo) {
             return;
         }
 
         // CACTUS
         if (tipo == 1) {
-
-            if (
-                esCactusLargo
-                    && cactusLargo != null
-            ) {
-
-                batch.draw(
-                    cactusLargo,
-                    x,
-                    sueloY,
-                    120,
-                    52
-                );
-
+            if (esCactusLargo && cactusLargo != null) {
+                batch.draw(cactusLargo, x, sueloY, anchoCactusLargo, altoCactusLargo);
             } else if (cactus != null) {
-
-                batch.draw(
-                    cactus,
-                    x,
-                    sueloY,
-                    35,
-                    52.9f
-                );
+                batch.draw(cactus, x, sueloY, 35, 52.9f);
             }
         }
-
         // PÁJARO
-        else if (
-            tipo == 2
-                && bird != null
-        ) {
-
-            batch.draw(
-                bird,
-                x,
-                sueloY + 25,
-                60,
-                40
-            );
+        else if (tipo == 2 && bird != null) {
+            batch.draw(bird, x, sueloY + 25, 60, 40);
         }
     }
 
     // INSTRUCCIONES
     private void dibujarInstrucciones() {
+        Gdx.gl.glClearColor(0.05f, 0.05f, 0.05f, 1);
+        Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 
-        Gdx.gl.glClearColor(
-            0.05f,
-            0.05f,
-            0.05f,
-            1
-        );
-
-        Gdx.gl.glClear(
-            GL20.GL_COLOR_BUFFER_BIT
-        );
-
-        batch.setProjectionMatrix(
-            camera.combined
-        );
-
+        batch.setProjectionMatrix(camera.combined);
         batch.begin();
 
         if (background != null) {
-
-            batch.draw(
-                background,
-                0,
-                0,
-                ANCHO,
-                ALTO
-            );
+            batch.draw(background, 0, 0, ANCHO, ALTO);
         }
 
-        GlyphLayout layout =
-            new GlyphLayout();
+        GlyphLayout layout = new GlyphLayout();
 
-        dibujarTextoCentrado(
-            layout,
-            "PREPARATE",
-            2f,
-            360
+        dibujarTextoCentrado(layout, "PREPARATE", 2f, 360);
+        dibujarTextoCentrado(layout, "ESPACIO = SALTAR", 1.4f, 280);
+        dibujarTextoCentrado(layout, "S = AGACHARSE", 1.4f, 220);
+
+        int segundos = (int) Math.ceil(
+            DURACION_INSTRUCCIONES - tiempoInstrucciones
         );
-
-        dibujarTextoCentrado(
-            layout,
-            "ESPACIO = SALTAR",
-            1.4f,
-            280
-        );
-
-        dibujarTextoCentrado(
-            layout,
-            "S = AGACHARSE",
-            1.4f,
-            220
-        );
-
-        int segundos =
-            (int) Math.ceil(
-                DURACION_INSTRUCCIONES
-                    - tiempoInstrucciones
-            );
 
         dibujarTextoCentrado(
             layout,
@@ -806,13 +627,8 @@ public class GameScreen implements Screen {
         float escala,
         float y
     ) {
-
         font.getData().setScale(escala);
-
-        layout.setText(
-            font,
-            texto
-        );
+        layout.setText(font, texto);
 
         font.draw(
             batch,
@@ -824,7 +640,6 @@ public class GameScreen implements Screen {
 
     // GAME OVER
     private void gameOver() {
-
         game.setScreen(
             new GameOverScreen(
                 game,
@@ -836,16 +651,8 @@ public class GameScreen implements Screen {
 
     // RESIZE
     @Override
-    public void resize(
-        int width,
-        int height
-    ) {
-
-        viewport.update(
-            width,
-            height,
-            true
-        );
+    public void resize(int width, int height) {
+        viewport.update(width, height, true);
     }
 
     @Override
@@ -863,29 +670,13 @@ public class GameScreen implements Screen {
     // DISPOSE
     @Override
     public void dispose() {
-
-        if (batch != null)
-            batch.dispose();
-
-        if (font != null)
-            font.dispose();
-
-        if (dino != null)
-            dino.dispose();
-
-        if (cactus != null)
-            cactus.dispose();
-
-        if (cactusLargo != null)
-            cactusLargo.dispose();
-
-        if (bird != null)
-            bird.dispose();
-
-        if (background != null)
-            background.dispose();
-
-        if (backgroundAtardecer != null)
-            backgroundAtardecer.dispose();
+        if (batch != null) batch.dispose();
+        if (font != null) font.dispose();
+        if (dino != null) dino.dispose();
+        if (cactus != null) cactus.dispose();
+        if (cactusLargo != null) cactusLargo.dispose();
+        if (bird != null) bird.dispose();
+        if (background != null) background.dispose();
+        if (backgroundAtardecer != null) backgroundAtardecer.dispose();
     }
 }
