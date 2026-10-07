@@ -804,20 +804,11 @@ public class GameScreen implements Screen {
             if (!hoyueloAbsorbiendo) {
                 hoyueloAbsorbiendo = true;
                 tiempoHoyuelo = 0;
-
-                if (sonidoChoque != null) {
-                    sonidoChoque.play(0.8f);
-                }
             }
             return;
         }
 
         terminado = true;
-
-        if (sonidoChoque != null) {
-            sonidoChoque.play(0.8f);
-        }
-
         gameOver();
     }
 
@@ -899,11 +890,6 @@ public class GameScreen implements Screen {
 
     @Override
     public void hide() {
-        if (musica != null) {
-            musica.stop();
-            musica.dispose();
-            musica = null;
-        }
     }
 
     // DISPOSE

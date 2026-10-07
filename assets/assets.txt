@@ -4,6 +4,7 @@ Ollita.png
 bird.png
 cactus.png
 cactus_largo.png
+choque.wav
 dino1.png
 dino2.png
 dino3.png
@@ -12,6 +13,8 @@ game_background_atardecer.png
 jugar.png
 libgdx.png
 menu_background.png
+musica_fondo.mp3
 pj.png
 salir.png
+salto.wav
 titulo.png

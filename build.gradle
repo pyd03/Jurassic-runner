@@ -57,7 +57,7 @@ configure(subprojects) {
 
 subprojects {
   version = "$projectVersion"
-  ext.appName = 'Jurassic-runner'
+  ext.appName = 'jurassic_runner'
   repositories {
     mavenCentral()
     // You may want to remove the following line if you have errors downloading dependencies.
@@ -67,4 +67,4 @@ subprojects {
   }
 }
 
-eclipse.project.name = 'Jurassic-runner' + '-parent'
+eclipse.project.name = 'jurassic_runner' + '-parent'
