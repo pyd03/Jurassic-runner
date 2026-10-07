@@ -4,6 +4,8 @@ import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.Screen;
+import com.badlogic.gdx.audio.Music;
+import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
@@ -38,6 +40,10 @@ public class GameScreen implements Screen {
     private Texture texOllita;
     private Texture texHoyueloTranquilo;
     private Texture texHoyueloEnojado;
+
+    private Sound sonidoSalto;
+    private Sound sonidoChoque;
+    private Music musica;
 
     private static final float TAM_POWERUP = 50;
     private static final float ALTURA_POWERUP = 80;
@@ -215,6 +221,26 @@ public class GameScreen implements Screen {
         }
 
         try {
+            sonidoSalto = Gdx.audio.newSound(Gdx.files.internal("salto.wav"));
+        } catch (Exception e) {
+            sonidoSalto = null;
+        }
+
+        try {
+            sonidoChoque = Gdx.audio.newSound(Gdx.files.internal("choque.wav"));
+        } catch (Exception e) {
+            sonidoChoque = null;
+        }
+
+        try {
+            musica = Gdx.audio.newMusic(Gdx.files.internal("musica_fondo.mp3"));
+            musica.setLooping(true);
+            musica.setVolume(0.5f);
+        } catch (Exception e) {
+            musica = null;
+        }
+
+        try {
             background = new Texture("game_background.png");
         } catch (Exception e) {
             background = null;
@@ -237,6 +263,10 @@ public class GameScreen implements Screen {
             if (tiempoInstrucciones >= DURACION_INSTRUCCIONES) {
                 mostrandoInstrucciones = false;
                 tiempoObstaculo = 0;
+
+                if (musica != null) {
+                    musica.play();
+                }
             }
             return;
         }
@@ -306,6 +336,10 @@ public class GameScreen implements Screen {
         alturaMinimaAlcanzada = false;
         caidaRapida = false;
         acumuladorFisica = 0;
+
+        if (sonidoSalto != null) {
+            sonidoSalto.play(0.6f);
+        }
     }
 
     private void terminarSalto() {
@@ -770,11 +804,20 @@ public class GameScreen implements Screen {
             if (!hoyueloAbsorbiendo) {
                 hoyueloAbsorbiendo = true;
                 tiempoHoyuelo = 0;
+
+                if (sonidoChoque != null) {
+                    sonidoChoque.play(0.8f);
+                }
             }
             return;
         }
 
         terminado = true;
+
+        if (sonidoChoque != null) {
+            sonidoChoque.play(0.8f);
+        }
+
         gameOver();
     }
 
@@ -856,6 +899,11 @@ public class GameScreen implements Screen {
 
     @Override
     public void hide() {
+        if (musica != null) {
+            musica.stop();
+            musica.dispose();
+            musica = null;
+        }
     }
 
     // DISPOSE
@@ -867,6 +915,9 @@ public class GameScreen implements Screen {
         if (cactus != null) cactus.dispose();
         if (cactusLargo != null) cactusLargo.dispose();
         if (bird != null) bird.dispose();
+        if (sonidoSalto != null) sonidoSalto.dispose();
+        if (sonidoChoque != null) sonidoChoque.dispose();
+        if (musica != null) musica.dispose();
         if (texOllita != null) texOllita.dispose();
         if (texHoyueloTranquilo != null) texHoyueloTranquilo.dispose();
         if (texHoyueloEnojado != null) texHoyueloEnojado.dispose();
