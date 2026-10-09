@@ -12,6 +12,10 @@ import com.badlogic.gdx.math.Rectangle;
 
 public class GameOverScreen implements Screen {
 
+    private static final int[] TITULO_VIS = {9, 63, 381, 351};
+    private static final int[] REINTENTAR_VIS = {3, 113, 704, 247};
+    private static final int[] MENU_VIS = {3, 105, 375, 273};
+
     private final Game game;
 
     private final int personaje;
@@ -23,9 +27,13 @@ public class GameOverScreen implements Screen {
 
     private Texture background;
     private Texture gameOverImagen;
+    private Texture reintentarImagen;
+    private Texture menuImagen;
 
     private Rectangle reintentar;
     private Rectangle menu;
+
+    private float escalaBoton;
 
     public GameOverScreen(
         Game game,
@@ -64,11 +72,31 @@ public class GameOverScreen implements Screen {
         try {
 
             gameOverImagen =
-                new Texture("gameover.png");
+                new Texture("game_over.png");
 
         } catch (Exception e) {
 
             gameOverImagen = null;
+        }
+
+        try {
+
+            reintentarImagen =
+                new Texture("reintentar.png");
+
+        } catch (Exception e) {
+
+            reintentarImagen = null;
+        }
+
+        try {
+
+            menuImagen =
+                new Texture("menu.png");
+
+        } catch (Exception e) {
+
+            menuImagen = null;
         }
 
         crearBotones();
@@ -79,27 +107,60 @@ public class GameOverScreen implements Screen {
         float ancho = Gdx.graphics.getWidth();
         float alto = Gdx.graphics.getHeight();
 
-        float anchoBoton =
-            ancho * 0.30f;
-
-        float altoBoton =
-            alto * 0.10f;
-
-        float xBoton =
-            (ancho - anchoBoton) / 2;
-
-        reintentar = new Rectangle(
-            xBoton,
-            alto * 0.30f,
-            anchoBoton,
-            altoBoton
+        escalaBoton = Math.min(
+            ancho * 0.30f / (REINTENTAR_VIS[2] - REINTENTAR_VIS[0]),
+            alto * 0.11f / (REINTENTAR_VIS[3] - REINTENTAR_VIS[1])
         );
 
-        menu = new Rectangle(
-            xBoton,
-            alto * 0.15f,
-            anchoBoton,
-            altoBoton
+        reintentar = rectVisible(
+            REINTENTAR_VIS,
+            ancho / 2,
+            alto * 0.27f
+        );
+
+        menu = rectVisible(
+            MENU_VIS,
+            ancho / 2,
+            alto * 0.12f
+        );
+    }
+
+    private Rectangle rectVisible(
+        int[] vis,
+        float centroX,
+        float centroY
+    ) {
+
+        float w = (vis[2] - vis[0]) * escalaBoton;
+        float h = (vis[3] - vis[1]) * escalaBoton;
+
+        return new Rectangle(
+            centroX - w / 2,
+            centroY - h / 2,
+            w,
+            h
+        );
+    }
+
+    private void dibujarCentrado(
+        Texture textura,
+        int[] vis,
+        float escala,
+        float centroX,
+        float centroY
+    ) {
+
+        float x = centroX - (vis[0] + vis[2]) / 2f * escala;
+
+        float y = centroY
+            - (textura.getHeight() - (vis[1] + vis[3]) / 2f) * escala;
+
+        batch.draw(
+            textura,
+            x,
+            y,
+            textura.getWidth() * escala,
+            textura.getHeight() * escala
         );
     }
 
@@ -140,20 +201,17 @@ public class GameOverScreen implements Screen {
         // Game Over
         if (gameOverImagen != null) {
 
-            float anchoTitulo =
-                ancho * 0.35f;
+            float escalaTitulo = Math.min(
+                ancho * 0.28f / (TITULO_VIS[2] - TITULO_VIS[0]),
+                alto * 0.38f / (TITULO_VIS[3] - TITULO_VIS[1])
+            );
 
-            float altoTitulo =
-                anchoTitulo *
-                    gameOverImagen.getHeight() /
-                    gameOverImagen.getWidth();
-
-            batch.draw(
+            dibujarCentrado(
                 gameOverImagen,
-                (ancho - anchoTitulo) / 2,
-                alto * 0.72f,
-                anchoTitulo,
-                altoTitulo
+                TITULO_VIS,
+                escalaTitulo,
+                ancho / 2,
+                alto * 0.66f
             );
 
         } else {
@@ -191,46 +249,74 @@ public class GameOverScreen implements Screen {
             batch,
             textoPuntos,
             (ancho - layout.width) / 2,
-            alto * 0.55f
+            alto * 0.40f
         );
 
         // Reintentar
-        font.getData().setScale(2);
+        if (reintentarImagen != null) {
 
-        String textoReintentar =
-            "REINTENTAR";
+            dibujarCentrado(
+                reintentarImagen,
+                REINTENTAR_VIS,
+                escalaBoton,
+                reintentar.x + reintentar.width / 2,
+                reintentar.y + reintentar.height / 2
+            );
 
-        layout.setText(
-            font,
-            textoReintentar
-        );
+        } else {
 
-        font.draw(
-            batch,
-            textoReintentar,
-            reintentar.x +
-                (reintentar.width - layout.width) / 2,
-            reintentar.y +
-                (reintentar.height + layout.height) / 2
-        );
+            font.getData().setScale(2);
+
+            String textoReintentar =
+                "REINTENTAR";
+
+            layout.setText(
+                font,
+                textoReintentar
+            );
+
+            font.draw(
+                batch,
+                textoReintentar,
+                reintentar.x +
+                    (reintentar.width - layout.width) / 2,
+                reintentar.y +
+                    (reintentar.height + layout.height) / 2
+            );
+        }
 
         // Menu Principal
-        String textoMenu =
-            "MENU PRINCIPAL";
+        if (menuImagen != null) {
 
-        layout.setText(
-            font,
-            textoMenu
-        );
+            dibujarCentrado(
+                menuImagen,
+                MENU_VIS,
+                escalaBoton,
+                menu.x + menu.width / 2,
+                menu.y + menu.height / 2
+            );
 
-        font.draw(
-            batch,
-            textoMenu,
-            menu.x +
-                (menu.width - layout.width) / 2,
-            menu.y +
-                (menu.height + layout.height) / 2
-        );
+        } else {
+
+            font.getData().setScale(2);
+
+            String textoMenu =
+                "MENU PRINCIPAL";
+
+            layout.setText(
+                font,
+                textoMenu
+            );
+
+            font.draw(
+                batch,
+                textoMenu,
+                menu.x +
+                    (menu.width - layout.width) / 2,
+                menu.y +
+                    (menu.height + layout.height) / 2
+            );
+        }
 
         batch.end();
 
@@ -302,5 +388,11 @@ public class GameOverScreen implements Screen {
 
         if (gameOverImagen != null)
             gameOverImagen.dispose();
+
+        if (reintentarImagen != null)
+            reintentarImagen.dispose();
+
+        if (menuImagen != null)
+            menuImagen.dispose();
     }
 }

@@ -10,11 +10,15 @@ dino2.png
 dino3.png
 game_background.png
 game_background_atardecer.png
+game_over.png
+gameover_background.png
 jugar.png
 libgdx.png
+menu.png
 menu_background.png
 musica_fondo.mp3
 pj.png
+reintentar.png
 salir.png
 salto.wav
 titulo.png

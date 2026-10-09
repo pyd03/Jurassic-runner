@@ -120,10 +120,7 @@ public class CharacterScreen implements Screen {
         float ancho = Gdx.graphics.getWidth();
         float alto = Gdx.graphics.getHeight();
 
-        // =========================
         // FONDO
-        // =========================
-
         if (background != null) {
 
             batch.draw(
@@ -135,10 +132,7 @@ public class CharacterScreen implements Screen {
             );
         }
 
-        // =========================
         // TITULO
-        // =========================
-
         font.getData().setScale(2.2f);
 
         font.draw(
@@ -148,16 +142,12 @@ public class CharacterScreen implements Screen {
             alto * 0.88f
         );
 
-        // =========================
-        // TAMAÑO DE LOS DINOS
-        // =========================
 
+        // TAMAÑO DE LOS DINOS
         float tamañoDino = alto * 0.30f;
 
-        // =========================
-        // DINO 1
-        // =========================
 
+        // DINO 1
         if (dino1 != null) {
 
             batch.draw(
@@ -169,10 +159,7 @@ public class CharacterScreen implements Screen {
             );
         }
 
-        // =========================
         // DINO 2
-        // =========================
-
         if (dino2 != null) {
 
             batch.draw(
@@ -184,10 +171,7 @@ public class CharacterScreen implements Screen {
             );
         }
 
-        // =========================
         // DINO 3
-        // =========================
-
         if (dino3 != null) {
 
             batch.draw(
@@ -199,10 +183,8 @@ public class CharacterScreen implements Screen {
             );
         }
 
-        // =========================
-        // NOMBRES
-        // =========================
 
+        // NOMBRES
         font.getData().setScale(1.3f);
 
         GlyphLayout layout = new GlyphLayout();
@@ -257,10 +239,8 @@ public class CharacterScreen implements Screen {
             xNombre3,
             yNombre3
         );
-        // =========================
-        // VOLVER
-        // =========================
 
+        // VOLVER
         font.getData().setScale(1.3f);
 
         String textoVolver = "VOLVER";
